@@ -19,6 +19,8 @@ class PluginListRenderer
   GITHUB_KEYS = [:stargazers_count]
   GITHUB_OWNER_KEYS = [:avatar_url]
 
+  CATEGORIES = %w[input output filter parser decoder formatter encoder]
+
   def search_gems
     @log.info "Searching embulk gems..."
 
@@ -92,7 +94,7 @@ class PluginListRenderer
     end
 
     gems = gems.sort_by {|gem| (gem[:stargazers_count] << 16) | (gem[:downloads] || 0) }.reverse
-    categories = gems.group_by {|gem| gem[:category] }
+    categories = gems.group_by {|gem| gem[:category] }.to_a.sort_by {|category,gems| CATEGORIES.index(category) }
     return ERB.new(erb).result(binding)
   end
 
