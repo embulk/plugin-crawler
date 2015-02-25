@@ -138,10 +138,9 @@ def update_index(log)
 
     FileUtils.mkdir_p "#{repo_dir}/plugins"
     erb = File.read("#{repo_dir}/embulk-docs/plugins/index.html.erb")
-    Dir["#{repo_dir}/embulk-docs/plugins/*"].each do |f|
-      fname = File.basename(f)
-      FileUtils.cp(f, "#{repo_dir}/plugins/#{fname}")
-      git.add("#{repo_dir}/plugins/#{fname}")
+    copy_files = {}
+    Dir["#{repo_dir}/embulk-docs/plugins/*"].each do |path|
+      copy_files[File.basename(path)] = File.read(path)
     end
 
     log.info git.checkout("gh-pages")
@@ -151,6 +150,10 @@ def update_index(log)
     html = PluginListRenderer.new(log).render(erb)
 
     File.write("#{repo_dir}/plugins/index.html", html)
+    copy_files.each_pair do |fname,data|
+      File.write("#{repo_dir}/plugins/#{fname}", data)
+      git.add("#{repo_dir}/plugins/#{fname}")
+    end
 
     git.add("#{repo_dir}/plugins/index.html")
     git.commit("updated plugins/index.html") rescue nil
