@@ -91,7 +91,7 @@ class PluginListRenderer
       gem[:author] = Array(gem[:authors] || []).join(', ')
     end
 
-    gems = gems.sort_by {|gem| (gem[:stargazers_count] << 16) | (gem[:downloads] || 0) }
+    gems = gems.sort_by {|gem| (gem[:stargazers_count] << 16) | (gem[:downloads] || 0) }.reverse
     categories = gems.group_by {|gem| gem[:category] }
     return ERB.new(erb).result(binding)
   end
