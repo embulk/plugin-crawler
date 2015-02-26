@@ -20,7 +20,7 @@ class PluginListRenderer
   GITHUB_OWNER_KEYS = [:avatar_url]
 
   CATEGORIES = %w[input output filter guess parser decoder formatter encoder]
-  FOR_FILE_CATEGORIES = %[parser decoder formatter encoder]
+  FOR_FILE_CATEGORIES = %w[parser decoder formatter encoder]
 
   def search_gems
     @log.info "Searching embulk gems..."
