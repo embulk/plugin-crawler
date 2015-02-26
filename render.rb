@@ -19,7 +19,8 @@ class PluginListRenderer
   GITHUB_KEYS = [:stargazers_count]
   GITHUB_OWNER_KEYS = [:avatar_url]
 
-  CATEGORIES = %w[input output filter parser decoder formatter encoder]
+  CATEGORIES = %w[input output filter guess parser decoder formatter encoder]
+  FOR_FILE_CATEGORIES = %[parser decoder formatter encoder]
 
   def search_gems
     @log.info "Searching embulk gems..."
@@ -43,7 +44,7 @@ class PluginListRenderer
         end
         gem_name = gem[:gem_name] = gem[:name]
         gem[:url] ||= "http://rubygems.org/gems/#{gem_name}"
-        m = gem_name.match(/^embulk-(input|output|filter|encoder|decoder|formatter|parser)-(.*)$/)
+        m = gem_name.match(/^embulk-(input|output|filter|guess|encoder|decoder|formatter|parser)-(.*)$/)
         next unless m
         gem[:category] = m[1]
         gem[:name] = m[2]
@@ -94,7 +95,14 @@ class PluginListRenderer
     end
 
     gems = gems.sort_by {|gem| (gem[:stargazers_count] << 16) | (gem[:downloads] || 0) }.reverse
-    categories = gems.group_by {|gem| gem[:category] }.to_a.sort_by {|category,gems| CATEGORIES.index(category) }
+    categories = gems.group_by {|gem|
+      cate = gem[:category]
+      if FOR_FILE_CATEGORIES.include?(cate)
+        "file #{cate}"
+      else
+        cate
+      end
+    }.to_a.sort_by {|category,gems| CATEGORIES.index(category) }
     return ERB.new(erb).result(binding)
   end
 
