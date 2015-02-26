@@ -95,14 +95,17 @@ class PluginListRenderer
     end
 
     gems = gems.sort_by {|gem| (gem[:stargazers_count] << 16) | (gem[:downloads] || 0) }.reverse
-    categories = gems.group_by {|gem|
-      cate = gem[:category]
-      if FOR_FILE_CATEGORIES.include?(cate)
-        "file #{cate}"
-      else
-        cate
+    categories = gems
+      .group_by {|gem| cate = gem[:category] }
+      .to_a
+      .sort_by {|category,gems| CATEGORIES.index(category) }
+      .map do |category,gems|
+        if FOR_FILE_CATEGORIES.include?(category)
+          category = "file #{category}"
+        end
+        [category, gems]
       end
-    }.to_a.sort_by {|category,gems| CATEGORIES.index(category) }
+
     return ERB.new(erb).result(binding)
   end
 
