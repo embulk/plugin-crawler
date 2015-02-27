@@ -58,7 +58,7 @@ class PluginListRenderer
   end
 
   def add_github_keys(gems)
-    Parallel.each(gems, in_threads: 4) do |gem|
+    Parallel.each(gems, in_threads: 2) do |gem|
       url = gem[:github_url]
       next unless url
 
@@ -71,7 +71,7 @@ class PluginListRenderer
 
       github_com = (Thread.current[:http] ||= Faraday.new('https://api.github.com'))
       res = github_com.get("/repos/#{owner}/#{repo}")
-      next if res.status != 200
+      next if res.status != 200  # TODO don't ignore if the cause is rate limit
 
       json = Oj.load(res.body)
       GITHUB_KEYS.each {|key| gem[key] = json[key.to_s] }
@@ -88,13 +88,14 @@ class PluginListRenderer
     gems = search_gems
     add_github_keys(gems)
 
+    gems = gems.sort_by {|gem| ((gem[:stargazers_count] || 0) << 16) | (gem[:downloads] || 0) }.reverse
+
     # cleanup
     gems.each do |gem|
-      gem[:stargazers_count] ||= 0
+      gem[:stargazers_count] ||= "-"
       gem[:author] = Array(gem[:authors] || []).join(', ')
     end
 
-    gems = gems.sort_by {|gem| (gem[:stargazers_count] << 16) | (gem[:downloads] || 0) }.reverse
     categories = gems
       .group_by {|gem| cate = gem[:category] }
       .to_a
