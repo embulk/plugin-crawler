@@ -26,6 +26,7 @@ class PluginListRenderer
     @log.info "Searching embulk gems..."
 
     gems = []
+    used = {}
 
     rubygems_org = Faraday.new('http://rubygems.org')
     (1..100).each do |i|
@@ -34,6 +35,9 @@ class PluginListRenderer
 
       json = Oj.load(res.body)
       json.each do |gem_json|
+        next if used[gem_json["name"]]
+        used[gem_json["name"]] = true
+
         gem = {}
         GEM_KEYS.each {|key| gem[key] = gem_json[key.to_s] }
         GEM_DOC_URL_KEYS.each do |k|
@@ -48,6 +52,7 @@ class PluginListRenderer
         next unless m
         gem[:category] = m[1]
         gem[:name] = m[2]
+
         gems << gem
       end
 
