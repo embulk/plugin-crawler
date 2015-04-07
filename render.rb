@@ -19,7 +19,7 @@ class PluginListRenderer
   GITHUB_KEYS = [:stargazers_count]
   GITHUB_OWNER_KEYS = [:avatar_url]
 
-  CATEGORIES = %w[input output filter guess parser decoder formatter encoder]
+  CATEGORIES = %w[input output filter guess parser decoder formatter encoder executor]
   FOR_FILE_CATEGORIES = %w[parser decoder formatter encoder]
 
   def search_gems
@@ -48,7 +48,7 @@ class PluginListRenderer
         end
         gem_name = gem[:gem_name] = gem[:name]
         gem[:url] ||= "http://rubygems.org/gems/#{gem_name}"
-        m = gem_name.match(/^embulk-(input|output|filter|guess|encoder|decoder|formatter|parser)-(.*)$/)
+        m = gem_name.match(/^embulk-(input|output|filter|guess|encoder|decoder|formatter|parser|executor)-(.*)$/)
         next unless m
         gem[:category] = m[1]
         gem[:name] = m[2]
