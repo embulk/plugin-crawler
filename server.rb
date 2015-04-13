@@ -21,8 +21,8 @@ get '/update' do
 end
 
 get '/embulk-latest.jar' do
-  version = get_latest_version
-  url = "https://dl.bintray.com/embulk/maven/embulk-#{version}.jar"
+  headers "Content-Type" => ""
+  url = "https://dl.bintray.com/embulk/maven/embulk-#{get_latest_version}.jar"
   redirect to(url), 302
 end
 
