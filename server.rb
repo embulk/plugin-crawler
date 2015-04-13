@@ -23,7 +23,8 @@ end
 get '/embulk-latest.jar' do
   version = get_latest_version
   url = "https://dl.bintray.com/embulk/maven/embulk-#{version}.jar"
-  redirect to(url), 302
+  headers 'Location' => url, 'Content-Type' => 'text/html'
+  status 302
   <<EOF
 <!DOCTYPE HTML>
 <html lang="en-US">
