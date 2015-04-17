@@ -153,22 +153,11 @@ def update_index(log)
     log.info git.branch("master").checkout
     log.info git.remote("origin").merge("master")
 
-    FileUtils.mkdir_p "#{repo_dir}/plugins"
-    erb = File.read("#{repo_dir}/embulk-docs/plugins/index.html.erb")
-    copy_files = {}
-    Dir["#{repo_dir}/embulk-docs/plugins/*"].each do |path|
-      copy_files[File.basename(path)] = File.read(path)
-    end
-
     current_commit = git.object('HEAD').sha
 
+    erb = File.read("#{repo_dir}/plugins/index.html.erb")
     html = PluginListRenderer.new(log).render(erb)
-
     File.write("#{repo_dir}/plugins/index.html", html)
-    copy_files.each_pair do |fname,data|
-      File.write("#{repo_dir}/plugins/#{fname}", data)
-      git.add("#{repo_dir}/plugins/#{fname}")
-    end
 
     git.add("#{repo_dir}/plugins/index.html")
     git.commit("updated plugins/index.html") rescue nil
@@ -181,7 +170,7 @@ def update_index(log)
       log.info "Pushing changes to remote repository..."
       File.write(credentials_path, "https://#{ENV['GITHUB_TOKEN']}:@github.com")
       begin
-        log.info git.push("origin", "gh-pages")
+        log.info git.push("origin", "master")
       ensure
         FileUtils.rm_f credentials_path
       end
