@@ -139,7 +139,7 @@ def update_index(log)
     else
       log.info "Cloning remote git repository..."
       FileUtils.mkdir_p(repo_dir)
-      git = Git.clone("https://github.com/embulk/embulk",
+      git = Git.clone("https://github.com/embulk/embulk.github.io",
                       File.basename(repo_dir), path: File.dirname(repo_dir))
     end
 
@@ -160,9 +160,7 @@ def update_index(log)
       copy_files[File.basename(path)] = File.read(path)
     end
 
-    log.info git.checkout("gh-pages")
-    log.info git.remote("origin").merge("gh-pages")
-    prev_commit = git.object('HEAD').sha
+    current_commit = git.object('HEAD').sha
 
     html = PluginListRenderer.new(log).render(erb)
 
@@ -176,7 +174,8 @@ def update_index(log)
     git.commit("updated plugins/index.html") rescue nil
 
     next_commit = git.object('HEAD').sha
-    if prev_commit == next_commit
+
+    if current_commit == next_commit
       log.info "Not changed."
     else
       log.info "Pushing changes to remote repository..."
