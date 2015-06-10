@@ -43,11 +43,10 @@ class PluginListRenderer
         GEM_DOC_URL_KEYS.each do |k|
           if url = gem_json[k.to_s]
             gem[:github_url] = url if url =~ /github.com/ && url.count("/") == 4
-            gem[:url] = url
           end
         end
         gem_name = gem[:gem_name] = gem[:name]
-        gem[:url] ||= "http://rubygems.org/gems/#{gem_name}"
+        gem[:url] = gem[:github_url] || "http://rubygems.org/gems/#{gem_name}"
         m = gem_name.match(/^embulk-(input|output|filter|guess|encoder|decoder|formatter|parser|executor)-(.*)$/)
         next unless m
         gem[:category] = m[1]
