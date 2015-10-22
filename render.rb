@@ -92,7 +92,7 @@ class PluginListRenderer
     gems = search_gems
     add_github_keys(gems)
 
-    gems = gems.sort_by {|gem| ((gem[:stargazers_count] || 0) << 16) | (gem[:downloads] || 0) }.reverse
+    gems = gems.sort_by {|gem| ((gem[:downloads] || 0) << 16) | (gem[:stargazers_count] || 0) }.reverse
 
     # cleanup
     gems.each do |gem|
