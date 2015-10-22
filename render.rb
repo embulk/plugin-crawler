@@ -28,7 +28,7 @@ class PluginListRenderer
     gems = []
     used = {}
 
-    rubygems_org = Faraday.new('http://rubygems.org')
+    rubygems_org = Faraday.new('https://rubygems.org')
     (1..100).each do |i|
       res = rubygems_org.get("/api/v1/search.json?query=embulk-&page=#{i}")
       raise "RubyGems.org search failed #{res.status} #{res.body}" if res.status != 200
