@@ -14,9 +14,10 @@ class PluginListRenderer
     Faraday.default_adapter = :httpclient
   end
 
-  GEM_KEYS = [:name, :authors, :version, :licenses, :downloads, :info]
-  GEM_DOC_URL_KEYS = [:project_uri, :source_code_uri, :homepage_uri, :documentation_uri]
-  GITHUB_KEYS = [:stargazers_count]
+  GEM_COPY_KEYS = [:name, :authors, :version, :licenses, :downloads, :info]
+  GEM_URL_KEYS = [:project_uri, :source_code_uri, :homepage_uri, :documentation_uri]
+
+  GITHUB_COPY_KEYS = [:stargazers_count]
   GITHUB_OWNER_KEYS = [:avatar_url]
 
   CATEGORIES = %w[input output filter guess parser decoder formatter encoder executor]
@@ -36,21 +37,26 @@ class PluginListRenderer
       json = Oj.load(res.body)
       json.each do |gem_json|
         next if used[gem_json["name"]]
-        used[gem_json["name"]] = true
 
         gem = {}
-        GEM_KEYS.each {|key| gem[key] = gem_json[key.to_s] }
-        GEM_DOC_URL_KEYS.each do |k|
+
+        gem[:url] = gem_json["homepage_uri"]
+        next unless gem[:url].to_s =~ /^http/
+
+        GEM_COPY_KEYS.each {|key| gem[key] = gem_json[key.to_s] }
+        GEM_URL_KEYS.each do |k|
           if url = gem_json[k.to_s]
-            gem[:github_url] = url if url =~ /github.com/ && url.count("/") == 4
+            gem[:github_url] = url if url =~ /https?\:\/\/github.com/ && url.count("/") == 4
           end
         end
         gem_name = gem[:gem_name] = gem[:name]
-        gem[:url] = gem[:github_url] || "http://rubygems.org/gems/#{gem_name}"
+
         m = gem_name.match(/^embulk-(input|output|filter|guess|encoder|decoder|formatter|parser|executor)-(.*)$/)
         next unless m
         gem[:category] = m[1]
         gem[:name] = m[2]
+
+        used[gem_json["name"]] = true
 
         gems << gem
       end
@@ -78,7 +84,7 @@ class PluginListRenderer
       next if res.status != 200  # TODO don't ignore if the cause is rate limit
 
       json = Oj.load(res.body)
-      GITHUB_KEYS.each {|key| gem[key] = json[key.to_s] }
+      GITHUB_COPY_KEYS.each {|key| gem[key] = json[key.to_s] }
 
       owner_json = (json['owner'] || {})
       GITHUB_OWNER_KEYS.each {|key| gem[key] = owner_json[key.to_s] }
